@@ -6,6 +6,7 @@ on:
     tags:
       - v*
   pull_request:
+    types: [opened, synchronize, reopened]
     paths-ignore:
       - '**.md'
       - '**/CODEOWNERS'
@@ -14,6 +15,13 @@ on:
       - '.github/workflows/backport.yml'
       - 'contrib/sign.sh'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+      
 jobs:
   generate_target_matrix:
     runs-on: ubuntu-latest
@@ -32,42 +40,32 @@ jobs:
           echo "build_target={\"target\": $(echo $target_list)}" >> $GITHUB_OUTPUT
 
   build_firmware:
-    needs: generate_target_matrix
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.generate_target_matrix.outputs.build_target_json) }}
-    runs-on: ubuntu-latest
+      matrix:
+        # Read back changed targets to create build matrix
+        target: ${{ fromJSON(needs.changed.outputs.targets) }}
+    runs-on: ubuntu-22.04
     steps:
-      - name: Maximize build space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Install build dependencies
-        run: |
-          sudo -E ./scripts/install_build_dependencies.sh
-      - name: pre-build without ffmuc-mesh-vpn-wireguard-vxlan (workaround for x86-64)
-        if: matrix.target == 'x86-64'
-        run: |
-          sed -i '/ffmuc-mesh-vpn-wireguard-vxlan/d' site.mk
-          make BROKEN=1 GLUON_TARGETS=${{ matrix.target }} V=s -j4
-          git checkout site.mk
-      - name: build target ${{ matrix.target }}
+      - uses: actions/checkout@v4
+
+      - name: Build Gluon
         id: compile
-        run: |
-          git checkout -b patched ${GITHUB_SHA}
-          make BROKEN=1 GLUON_TARGETS=${{ matrix.target }} V=s -j4
-          echo "status=success" >> $GITHUB_OUTPUT
-      - name: Upload firmware ${{ matrix.target }}
+        run: docker run --rm -v $PWD:/gluon-ci -w /gluon-ci --user "$(id -u):$(id -g)" ghcr.io/freifunk-gluon/gluon-build:v2023.2.2 contrib/actions/run-build.sh ${{ matrix.target }}
+
+      - name: Archive build logs
+        uses: actions/upload-artifact@v4
+        if: steps.compile.outputs.status == 'success'
+        with:
+          name: ${{ matrix.target }}_logs
+          path: openwrt/logs
+
+      - name: Archive build output
         uses: actions/upload-artifact@v4
         if: steps.compile.outputs.status == 'success'
         with:
           name: ${{ matrix.target }}_output
-          path: ./output
+          path: output
 
   create_release:
     runs-on: ubuntu-latest
