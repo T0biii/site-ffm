@@ -42,9 +42,7 @@ jobs:
   build_firmware:
     strategy:
       fail-fast: false
-      matrix:
-        # Read back changed targets to create build matrix
-        target: ${{ fromJSON(needs.changed.outputs.targets) }}
+      matrix: ${{ fromJson(needs.generate_target_matrix.outputs.build_target_json) }}
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
