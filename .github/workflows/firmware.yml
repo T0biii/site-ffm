@@ -51,12 +51,11 @@ jobs:
           fetch-depth: 0
 
       - name: Build Gluon
-        id: compile
         run: docker run --rm -v $PWD:/gluon-ci -w /gluon-ci --user "$(id -u):$(id -g)" ghcr.io/freifunk-gluon/gluon-build:v2023.2.2 contrib/actions/run-build.sh ${{ matrix.target }}
 
       - name: Archive build logs
         uses: actions/upload-artifact@v4
-        if: steps.compile.outputs.status == 'success'
+        if: ${{ !cancelled() }}
         with:
           name: ${{ matrix.target }}_logs
           path: openwrt/logs
