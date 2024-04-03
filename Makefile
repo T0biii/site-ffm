@@ -39,16 +39,16 @@ build: gluon-prepare output-clean
 ifeq ($(origin GLUON_DEVICES), undefined)
 	for target in ${GLUON_TARGETS}; do \
 		echo ""Building target $$target""; \
-		${GLUON_MAKE} download all GLUON_TARGET="$$target"; \
+		+${GLUON_MAKE} download all GLUON_TARGET="$$target"; \
 	done
 else # only run for specific gluon devices (works only for a single GLUON_TARGET)
 	echo ""Building target ${GLUON_TARGETS} for devices ${GLUON_DEVICES}""; \
-	${GLUON_MAKE} download all GLUON_DEVICES="${GLUON_DEVICES}" GLUON_TARGET="${GLUON_TARGETS}"
+	+${GLUON_MAKE} download all GLUON_DEVICES="${GLUON_DEVICES}" GLUON_TARGET="${GLUON_TARGETS}"
 endif
 
 manifest: build
 	for branch in next experimental testing stable; do \
-		${GLUON_MAKE} manifest GLUON_AUTOUPDATER_BRANCH=$$branch;\
+		+${GLUON_MAKE} manifest GLUON_AUTOUPDATER_BRANCH=$$branch;\
 	done
 	mv -f ${GLUON_BUILD_DIR}/output/* ./output/
 
@@ -72,7 +72,7 @@ gluon-update: | ${GLUON_BUILD_DIR}/.git
 gluon-prepare: gluon-update
 	${MAKE} gluon-patch
 	ln -sfT .. ${GLUON_BUILD_DIR}/site
-	${GLUON_MAKE} update
+	+${GLUON_MAKE} update
 
 gluon-patch:
 	scripts/apply_patches.sh ${GLUON_BUILD_DIR} ${PATCH_DIR}
