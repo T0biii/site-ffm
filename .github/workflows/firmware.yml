@@ -51,9 +51,9 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
-      
+
       - name: Checkout
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -62,7 +62,6 @@ jobs:
         run: |
           docker run --rm -v $PWD:/gluon-ci -w /gluon-ci --user "$(id -u):$(id -g)" ghcr.io/freifunk-gluon/gluon-build:v2023.2.2 contrib/actions/run-build.sh ${{ matrix.target }}
           echo "status=success" >> $GITHUB_OUTPUT
-
       - name: Archive build output
         uses: actions/upload-artifact@v4
         if: steps.compile.outputs.status == 'success'
