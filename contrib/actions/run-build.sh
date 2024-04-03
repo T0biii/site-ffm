@@ -32,7 +32,9 @@ export GLUON_SITEDIR="../"
 export GLUON_TARGET="$1"
 export BUILD_LOG=1
 
-echo "Building FFMUC Firmware"
+BUILD_THREADS="$(($(nproc) + 1))"
+
+echo "Building FFMUC Firmware with $BUILD_THREADS threads"
 
 #make update
-make V=s
+make -j$BUILD_THREADS V=s
