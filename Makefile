@@ -70,7 +70,7 @@ gluon-update: | ${GLUON_BUILD_DIR}/.git
 	cd ${GLUON_BUILD_DIR} && git clean -fd
 
 gluon-prepare: gluon-update
-	make gluon-patch
+	${MAKE} gluon-patch
 	ln -sfT .. ${GLUON_BUILD_DIR}/site
 	${GLUON_MAKE} update
 
