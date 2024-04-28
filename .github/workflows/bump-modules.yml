@@ -16,7 +16,7 @@ jobs:
       COMMIT_NAME: Modules CI Bot
       COMMIT_EMAIL: bot@freifunkmuc.github.io
     steps:
-      - name: Clone Gluon
+      - name: Clone Firmware
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
