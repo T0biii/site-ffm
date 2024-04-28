@@ -49,6 +49,7 @@ jobs:
             [1]: https://github.com/peter-evans/create-pull-request
           commit-message: bump modules version
           branch: ${{ steps.branch-name.outputs.branch-name }}
+          base: ${{ github.event.inputs.branch }}
           
       - name: Check outputs
         if: ${{ steps.cpr.outputs.pull-request-number }}
