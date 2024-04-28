@@ -43,7 +43,6 @@ jobs:
             [1]: https://github.com/peter-evans/create-pull-request
           commit-message: bump modules version
           committer: "${{ env.COMMIT_NAME }} <${{ env.COMMIT_EMAIL }}>"
-          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           branch: ${{ steps.branch-name.outputs.branch-name }}
           
       - name: Check outputs
