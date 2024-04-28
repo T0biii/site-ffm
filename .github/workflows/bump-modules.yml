@@ -1,0 +1,45 @@
+---
+name: "Update Modules base"
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to create update for"
+        required: true
+        default: "stable"
+
+jobs:
+  update-Modules:
+    runs-on: ubuntu-22.04
+    env:
+      COMMIT_NAME: Modules CI Bot
+      COMMIT_EMAIL: bot@freifunkmuc.github.io
+    steps:
+      - name: Clone Gluon
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      
+      - name: Configure Git User and E-Mail
+        run: git config --global user.name "${{ env.COMMIT_NAME }}" && git config --global user.email "${{ env.COMMIT_EMAIL }}"
+      
+      - name: Get update branch name
+        id: branch-name
+        run: echo "branch-name=update-modules-${{ github.event.inputs.branch }}-$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Invoke update-modules
+        run: ./contrib/update-modules.sh
+            
+      - name: Check if unstaged commits exist
+        run: git diff --exit-code || echo "::warning::Patches need a manual refresh"
+      
+      - name: Checkout individual branch name
+        run: git checkout -b ${{ steps.branch-name.outputs.branch-name }}
+      
+      - name: Push branch
+        run: git push origin HEAD
+
+      - name: Emit PR creation message
+        run:
+          echo "::notice::Create pull-request at https://github.com/${{ github.repository }}/compare/${{ github.event.inputs.branch }}...${{ steps.branch-name.outputs.branch-name }}?quick_pull=1"
