@@ -18,9 +18,14 @@ jobs:
       - name: Clone Firmware
         uses: actions/checkout@v4
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
       - name: Get update branch name
         id: branch-name
-        run: echo "branch-name=update-modules-${{ github.event.inputs.branch }}-$(date +%s)" >> $GITHUB_OUTPUT
+        run: echo "branch-name=update-modules-${{ steps.extract_branch.outputs.branch }}-$(date +%s)" >> $GITHUB_OUTPUT
 
       - name: Invoke update-modules
         run: ./contrib/update-modules.sh
