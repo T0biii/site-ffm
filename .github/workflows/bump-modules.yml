@@ -5,9 +5,15 @@ on:
   workflow_dispatch:
     inputs:
       branch:
+        type: choice
         description: "Branch to create update for"
         required: true
         default: "stable"
+        options: 
+        - stable
+        - next
+        - legacy
+        
 permissions:
   contents: write # so it can comment
   pull-requests: write # so it can create pull requests
@@ -42,7 +48,6 @@ jobs:
 
             [1]: https://github.com/peter-evans/create-pull-request
           commit-message: bump modules version
-          committer: "${{ env.COMMIT_NAME }} <${{ env.COMMIT_EMAIL }}>"
           branch: ${{ steps.branch-name.outputs.branch-name }}
           
       - name: Check outputs
