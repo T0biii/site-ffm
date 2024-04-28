@@ -36,6 +36,9 @@ jobs:
       
       - name: Checkout individual branch name
         run: git checkout -b ${{ steps.branch-name.outputs.branch-name }}
+
+      - name: Commit unstagged commits
+        run: git add . && git commit -m "bump modules version"
       
       - name: Push branch
         run: git push origin HEAD
