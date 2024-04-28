@@ -3,16 +3,6 @@ name: "Update Modules base"
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        type: choice
-        description: "Branch to create update for"
-        required: true
-        default: "stable"
-        options: 
-        - stable
-        - next
-        - legacy
         
 permissions:
   contents: write # so it can comment
@@ -27,8 +17,6 @@ jobs:
     steps:
       - name: Clone Firmware
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch }}
 
       - name: Get update branch name
         id: branch-name
@@ -49,7 +37,6 @@ jobs:
             [1]: https://github.com/peter-evans/create-pull-request
           commit-message: bump modules version
           branch: ${{ steps.branch-name.outputs.branch-name }}
-          base: ${{ github.event.inputs.branch }}
           
       - name: Check outputs
         if: ${{ steps.cpr.outputs.pull-request-number }}
