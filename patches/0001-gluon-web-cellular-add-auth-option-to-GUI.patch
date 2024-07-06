@@ -1,0 +1,118 @@
+From 571b7e4cdfadc03ecc01dd2954d4b83374ab6bbe Mon Sep 17 00:00:00 2001
+From: Tobias <5702338+T0biii@users.noreply.github.com>
+Date: Sat, 6 Jul 2024 01:03:28 +0200
+Subject: [PATCH] gluon-web-cellular: add auth option to GUI
+
+---
+ .../luasrc/lib/gluon/upgrade/250-cellular     |  2 ++
+ package/gluon-web-cellular/i18n/de.po         | 21 +++++++++++++++++++
+ .../i18n/gluon-web-cellular.pot               | 18 ++++++++++++++++
+ .../config-mode/model/admin/cellular.lua      | 10 +++++++++
+ 4 files changed, 51 insertions(+)
+
+diff --git a/package/gluon-core/luasrc/lib/gluon/upgrade/250-cellular b/package/gluon-core/luasrc/lib/gluon/upgrade/250-cellular
+index 27294c4d..300347e3 100755
+--- a/package/gluon-core/luasrc/lib/gluon/upgrade/250-cellular
++++ b/package/gluon-core/luasrc/lib/gluon/upgrade/250-cellular
+@@ -21,6 +21,7 @@ local function setup_ncm_qmi(devpath, control_type, delay)
+ 	local pincode = uci:get('gluon', 'cellular', 'pin')
+ 	local username = uci:get('gluon', 'cellular', 'username')
+ 	local password = uci:get('gluon', 'cellular', 'password')
++	local auth = uci:get('gluon', 'cellular', 'auth')
+ 
+ 	uci:section('network', 'interface', 'cellular', {
+ 		proto = control_type,
+@@ -40,6 +41,7 @@ local function setup_ncm_qmi(devpath, control_type, delay)
+ 	set_or_delete('network', 'cellular', 'pincode', pincode)
+ 	set_or_delete('network', 'cellular', 'username', username)
+ 	set_or_delete('network', 'cellular', 'password', password)
++	set_or_delete('network', 'cellular', 'auth', auth)
+ 	set_or_delete('network', 'cellular', 'delay', delay)
+ end
+ 
+diff --git a/package/gluon-web-cellular/i18n/de.po b/package/gluon-web-cellular/i18n/de.po
+index 81405234..2d869fb4 100644
+--- a/package/gluon-web-cellular/i18n/de.po
++++ b/package/gluon-web-cellular/i18n/de.po
+@@ -47,3 +47,24 @@ msgstr ""
+ "Du kannst den Uplink über einen Mobilfunk Service aktivieren. Wenn du "
+ "dich dafür entscheidest, wird die VPN-Verbindung über das integrierte "
+ "Mobilfunk-Modem hergestellt."
++
++msgid "auth"
++msgstr "Authentication"
++
++msgid "auth"
++msgstr ""
++
++msgid "none"
++msgstr ""
++
++msgid "pap"
++msgstr ""
++
++msgid "chap"
++msgstr ""
++
++msgid "both"
++msgstr ""
++
++msgid "roaming"
++msgstr "Roaming"
+diff --git a/package/gluon-web-cellular/i18n/gluon-web-cellular.pot b/package/gluon-web-cellular/i18n/gluon-web-cellular.pot
+index 5b3b8ae0..d4f14c5b 100644
+--- a/package/gluon-web-cellular/i18n/gluon-web-cellular.pot
++++ b/package/gluon-web-cellular/i18n/gluon-web-cellular.pot
+@@ -35,3 +35,21 @@ msgid ""
+ "You can enable uplink via cellular service. If you decide so, the VPN "
+ "connection is established using the integrated WWAN modem."
+ msgstr ""
++
++msgid "auth"
++msgstr ""
++
++msgid "none"
++msgstr ""
++
++msgid "pap"
++msgstr ""
++
++msgid "chap"
++msgstr ""
++
++msgid "both"
++msgstr ""
++
++msgid "roaming"
++msgstr ""
+diff --git a/package/gluon-web-cellular/luasrc/lib/gluon/config-mode/model/admin/cellular.lua b/package/gluon-web-cellular/luasrc/lib/gluon/config-mode/model/admin/cellular.lua
+index 38a4dd2c..ac6cdc62 100644
+--- a/package/gluon-web-cellular/luasrc/lib/gluon/config-mode/model/admin/cellular.lua
++++ b/package/gluon-web-cellular/luasrc/lib/gluon/config-mode/model/admin/cellular.lua
+@@ -33,6 +33,15 @@ local password = s:option(Value, "password", translate("Password"))
+ password:depends(enabled, true)
+ password.default = uci:get('gluon', 'cellular', 'password')
+ 
++local auth = s:option(ListValue, "auth", translate("auth"))
++auth:depends(enabled, true)
++auth:value("none", translate("none"))
++auth:value("pap", translate("pap"))
++auth:value("chap", translate("chap"))
++auth:value("both", translate("both"))
++auth:value("roaming", translate("roaming"))
++auth.default = uci:get('gluon', 'cellular', 'auth') or "none"
++
+ function f:write()
+ 	local cellular_enabled = false
+ 	if enabled.data then
+@@ -46,6 +55,7 @@ function f:write()
+ 		pin = pin.data,
+ 		username = username.data,
+ 		password = password.data,
++		auth = auth.data,
+ 	})
+ 
+ 	uci:commit('gluon')
+-- 
+2.45.1
+
